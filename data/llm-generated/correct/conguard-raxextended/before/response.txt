@@ -1,0 +1,154 @@
+ChangeLog:1@RAXextended.java
+FixDescription: Fix the potential race condition and atomicity violation in the Planner and Executive classes by ensuring proper synchronization when accessing and modifying the shared Event objects.
+OriginalCode@43-53:
+[43]         count = Events.plan.count;
+[44]         while(true){
+[45]             if (count == Events.plan.count) {
+[46]                 if (count != Events.plan.count) {
+[47]                     throw new RuntimeException("bug");
+[48]                 }
+[49]                 Events.plan.wait_for_event();
+[50]             }
+[51]             count = Events.plan.count;
+[52]             plan.generate();
+[53]             Events.exec.signal_event();
+FixedCode@43-53:
+[43]         synchronized(Events.plan) {
+[44]             count = Events.plan.count;
+[45]             while(true){
+[46]                 if (count == Events.plan.count) {
+[47]                     Events.plan.wait_for_event();
+[48]                 }
+[49]                 count = Events.plan.count;
+[50]                 plan.generate();
+[51]                 synchronized(Events.exec) {
+[52]                     Events.exec.signal_event();
+[53]                 }
+[54]             }
+[55]         }
+
+OriginalCode@65-74:
+[65]         count = Events.exec.count;
+[66]         while(true){
+[67]             Events.plan.signal_event();
+[68]             if (count == Events.exec.count)
+[69]                 Events.exec.wait_for_event();
+[70]             count = Events.exec.count;
+[71]             while (!plan.done()) {
+[72]                 plan.executeToken();
+[73]             }
+[74]         }
+FixedCode@65-74:
+[65]         synchronized(Events.exec) {
+[66]             count = Events.exec.count;
+[67]             while(true){
+[68]                 synchronized(Events.plan) {
+[69]                     Events.plan.signal_event();
+[70]                 }
+[71]                 if (count == Events.exec.count)
+[72]                     Events.exec.wait_for_event();
+[73]                 count = Events.exec.count;
+[74]                 while (!plan.done()) {
+[75]                     plan.executeToken();
+[76]                 }
+[77]             }
+[78]         }
+
+ChangeLog:2@RAXextended.java
+FixDescription: Ensure proper synchronization in the Diagnosis class to avoid race conditions when accessing shared Event objects.
+OriginalCode@83-87:
+[83]     public void run(){
+[84]         while (true){
+[85]             Events.exec.wait_for_event();
+[86]             plan.repair();
+[87]         }
+FixedCode@83-87:
+[83]     public void run(){
+[84]         while (true){
+[85]             synchronized(Events.exec) {
+[86]                 Events.exec.wait_for_event();
+[87]                 plan.repair();
+[88]             }
+[89]         }
+
+
+
+
+
+
+
+ChangeLog:1@RAXextended.java
+FixDescription: Fix potential race conditions and atomicity violations in Planner and Executive classes by ensuring proper synchronization when accessing and modifying the shared Event objects.
+OriginalCode@43-54:
+[43]     count = Events.plan.count;
+[44]     while(true){
+[45]       if (count == Events.plan.count) {
+[46]         if (count != Events.plan.count) {
+[47] 	  throw new RuntimeException("bug");
+[48] 	}
+[49]         Events.plan.wait_for_event();
+[50]       }
+[51]       count = Events.plan.count;
+[52]       plan.generate();
+[53]       Events.exec.signal_event();
+[54]     }
+FixedCode@43-54:
+[43]     synchronized(Events.plan) {
+[44]         count = Events.plan.count;
+[45]         while(true){
+[46]             if (count == Events.plan.count) {
+[47]                 Events.plan.wait_for_event();
+[48]             }
+[49]             count = Events.plan.count;
+[50]             plan.generate();
+[51]             synchronized(Events.exec) {
+[52]                 Events.exec.signal_event();
+[53]             }
+[54]         }
+[55]     }
+
+OriginalCode@65-74:
+[65]     count = Events.exec.count;
+[66]     while(true){
+[67]       Events.plan.signal_event();
+[68]       if (count == Events.exec.count)
+[69]         Events.exec.wait_for_event();
+[70]       count = Events.exec.count;
+[71]       while (!plan.done()) {
+[72]         plan.executeToken();
+[73]       }
+[74]     }
+FixedCode@65-74:
+[65]     synchronized(Events.exec) {
+[66]         count = Events.exec.count;
+[67]         while(true){
+[68]             synchronized(Events.plan) {
+[69]                 Events.plan.signal_event();
+[70]             }
+[71]             if (count == Events.exec.count)
+[72]                 Events.exec.wait_for_event();
+[73]             count = Events.exec.count;
+[74]             while (!plan.done()) {
+[75]                 plan.executeToken();
+[76]             }
+[77]         }
+[78]     }
+
+ChangeLog:2@RAXextended.java
+FixDescription: Ensure proper synchronization in the Diagnosis class to avoid race conditions when accessing shared Event objects.
+OriginalCode@83-87:
+[83]     public void run(){
+[84]         while (true){
+[85]             Events.exec.wait_for_event();
+[86]             plan.repair();
+[87]         }
+FixedCode@83-87:
+[83]     public void run(){
+[84]         while (true){
+[85]             synchronized(Events.exec) {
+[86]                 Events.exec.wait_for_event();
+[87]                 plan.repair();
+[88]             }
+[89]         }
+
+Process finished with exit code 1

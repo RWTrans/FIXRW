@@ -1,0 +1,188 @@
+package alarmclock;
+public class AlarmClock {
+    public static void main(String[] args) {
+        int maxTime = 5;
+        Monitor m = new Monitor(maxTime);
+        new Clock(1, m, maxTime).start();
+        Client c1 = new Client(2, m, 1);
+        Client c2 = new Client(3, m, 2);
+        Client c3 = new Client(4, m, 3);
+        Client c4 = new Client(5, m, 4);
+        Client c5 = new Client(6, m, 5);
+        Client c6 = new Client(7, m, 6);
+        Client c7 = new Client(8, m, 7);
+        Client c8 = new Client(9, m, 8);
+        c1.start();
+        c2.start();
+        c3.start();
+        c4.start();
+        c5.start();
+        c6.start();
+        c7.start();
+        c8.start();
+    }
+}
+class Clock extends Thread {
+    private int name;
+    private Monitor monitor;
+    private int max;
+    public Clock(int n, Monitor m, int maxTime) {
+        name = n;
+        monitor = m;
+        max = maxTime;
+    }
+    public void run() {
+        while (monitor.getTime() < max) {
+            monitor.tick();
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+            }
+        }
+    }
+}
+class Client extends Thread {
+    private int name;
+    private Monitor monitor;
+    private int id;
+    public Client(int n, Monitor m, int i) {
+        name = n;
+        monitor = m;
+        id = i;
+    }
+    public void run() {
+        int maxSleepTime = 5;
+        int interval;
+        interval = 2;
+        monitor.wakeme(id, interval);
+    }
+}
+class Monitor {
+    private int now;
+    private MyLinkedList waitList;
+    private int max;
+    Monitor(int maxTime) {
+        now = 0;
+        waitList = new MyLinkedList();
+        max = maxTime;
+    }
+    void tick() {
+        synchronized (this) {
+            now++;
+            if (!waitList.isEmpty()) {
+                MyObject first = (MyObject) waitList.firstElement();
+                if (first.time() == now) {
+                    MyObject wakeup = first;
+                    waitList.removeElementAt(0);
+                    synchronized (wakeup) {
+                        wakeup.notifyAll();
+                    }
+                }
+            }
+        }
+    }
+    void wakeme(int id, int interval) {
+        int waketime;
+        MyObject lock;
+        synchronized (this) {
+            waketime = now + interval;
+            if (waketime > max) {
+                return;
+            }
+            lock = waitList.createLock(waketime);
+        }
+        try {
+            synchronized (waitList.getLock(waketime)) {
+                try {
+                    waitList.getLock(waketime).wait();
+                } catch (InterruptedException e) {
+                }
+            }
+        } catch (IndexOutOfBoundsException e) {
+        }
+    }
+    int getTime() {
+        return now;
+    }
+}
+class MyObject {
+    public int time;
+    MyObject(int n) {
+        time = n;
+    }
+    public int time() {
+        return time;
+    }
+}
+class MyLinkedList {
+    private Object[] list = new Object[2];
+    private int capacity = 2;
+    private int size = 0;
+    public boolean isEmpty() {
+        return size == 0;
+    }
+    public boolean isFull() {
+        return size == capacity;
+    }
+//...
+    public void insertElementAt(Object obj, int index) {
+        if (!this.isFull()) {
+            for (int i = size - 1; i >= index; i--) {
+                list[i + 1] = list[i];
+            }
+            list[index] = obj;
+            size++;
+        }
+    }
+    public void addElement(Object obj) {
+        if (!this.isFull()) {
+            list[size] = obj;
+            size++;
+        }
+    }
+    public Object firstElement() {
+        return list[0];
+    }
+    public void removeElementAt(int index) {
+        if (!this.isEmpty()) {
+            for (int i = index; i < (size - 1); i++) {
+                list[i] = list[i + 1];
+            }
+            list[size - 1] = null;
+            size--;
+        }
+    }
+    MyObject createLock(int n) {
+        MyObject temp;
+        int key;
+        for (int i = 0; i < size; i++) {
+            key = ((MyObject) list[i]).time;
+            if (n == key) {
+                temp = (MyObject) list[i];
+                return temp;
+            }
+        }
+        MyObject lock = new MyObject(n);
+        for (int i = 0; i < size; i++) {
+            key = ((MyObject) list[i]).time;
+            if (n < key) {
+                this.insertElementAt((Object) lock, i);
+                return lock;
+            }
+        }
+        this.addElement((Object) lock); 
+        return lock;
+    }
+    MyObject getLock(int n) {
+        MyObject temp;
+        int m;
+        for (int i = 0; i < size; i++) {
+            m = ((MyObject) list[i]).time;
+            if (n == m) {
+                temp = (MyObject) list[i];
+                return temp;
+            }
+        }
+        throw new IndexOutOfBoundsException();
+    }
+}

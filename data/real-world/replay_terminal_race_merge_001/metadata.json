@@ -1,0 +1,6 @@
+{
+  "case_id": "replay_terminal_race_merge_001",
+  "repository": "ReactiveX/RxJava",
+  "project_version": "0.18.2-SNAPSHOT",
+  "test_entry": "rxjava-core/src/test/java/rx/subjects/ReplaySubjectConcurrencyTest.java#testRaceForTerminalState"
+}

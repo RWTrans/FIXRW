@@ -1,0 +1,7 @@
+{
+  "case_id": "raxextended2",
+  "generator": "ConGuard",
+  "correctness": "incorrect",
+  "before": "before",
+  "after": "after"
+}

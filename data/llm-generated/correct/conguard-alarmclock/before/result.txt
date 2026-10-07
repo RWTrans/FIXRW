@@ -1,0 +1,87 @@
+ChangeLog:1@AlarmClock.java
+FixDescription: Ensure that the Monitor's tick method and the wakeme method are properly synchronized to avoid race conditions and ensure atomicity when updating and checking the time and waitList.
+OriginalCode@69-82:
+```java
+[69]     void tick() {
+[70]         synchronized (this) {
+[71]             now++;
+[72]             if (!waitList.isEmpty()) {
+[73]                 MyObject first = (MyObject) waitList.firstElement();
+[74]                 if (first.time() == now) {
+[75]                     MyObject wakeup = first;
+[76]                     waitList.removeElementAt(0);
+[77]                     synchronized (wakeup) {
+[78]                         wakeup.notifyAll();
+[79]                     }
+[80]                 }
+[81]             }
+[82]         }
+```
+FixedCode@69-82:
+```java
+[69]     synchronized void tick() {
+[70]         now++;
+[71]         if (!waitList.isEmpty()) {
+[72]             MyObject first = (MyObject) waitList.firstElement();
+[73]             if (first.time() == now) {
+[74]                 MyObject wakeup = first;
+[75]                 waitList.removeElementAt(0);
+[76]                 synchronized (wakeup) {
+[77]                     wakeup.notifyAll();
+[78]                 }
+[79]             }
+[80]         }
+[81]     }
+[82]     
+```
+
+ChangeLog:2@AlarmClock.java
+FixDescription: Ensure that the wakeme method handles the waitList and synchronization correctly to avoid potential race conditions and deadlocks.
+OriginalCode@84-103:
+```java
+[84]     void wakeme(int id, int interval) {
+[85]         int waketime;
+[86]         MyObject lock;
+[87]         synchronized (this) {
+[88]             waketime = now + interval;
+[89]             if (waketime > max) {
+[90]                 return;
+[91]             }
+[92]             lock = waitList.createLock(waketime);
+[93]         }
+[94]         try {
+[95]             synchronized (waitList.getLock(waketime)) {
+[96]                 try {
+[97]                     waitList.getLock(waketime).wait();
+[98]                 } catch (InterruptedException e) {
+[99]                 }
+[100]             }
+[101]         } catch (IndexOutOfBoundsException e) {
+[102]         }
+[103]     }
+```
+FixedCode@84-103:
+```java
+[84]     synchronized void wakeme(int id, int interval) {
+[85]         int waketime = now + interval;
+[86]         if (waketime > max) {
+[87]             return;
+[88]         }
+[89]         MyObject lock = waitList.createLock(waketime);
+[90]         try {
+[91]             synchronized (lock) {
+[92]                 lock.wait();
+[93]             }
+[94]         } catch (InterruptedException e) {
+[95]         }
+[96]     }
+[97]     
+[98]     
+[99]     
+[100]    
+[101]    
+[102]    
+[103]    
+```
+
+These changes ensure that the Monitor's methods that modify shared state (`tick` and `wakeme`) are fully synchronized to prevent race conditions and ensure that operations on the waitList and time checking are atomic, reducing the risk of concurrency issues.

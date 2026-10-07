@@ -1,0 +1,21 @@
+ext.githubProjectName = 'RxJava'
+
+allprojects {
+    apply plugin: 'java'
+    group = "com.netflix.rxjava"
+    sourceCompatibility = JavaVersion.VERSION_1_6
+    targetCompatibility = JavaVersion.VERSION_1_6
+    repositories {
+        mavenLocal()
+        maven { url 'https://repo1.maven.org/maven2' }
+    }
+}
+
+project(':rxjava-core') {
+    sourceSets.test.java.srcDir 'src/test/java'
+
+    dependencies {
+        testCompile 'junit:junit-dep:4.10'
+        testCompile 'org.mockito:mockito-core:1.8.5'
+    }
+}

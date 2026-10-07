@@ -1,0 +1,167 @@
+##### You were given a code snippet that may contain concurrency bugs. Some methods unrelated to the concurrency bugs have already been filtered out.
+### source code
+#### RAXextended.java
+```java
+1. package raxextended;
+2. import java.lang.*;
+3. class Event{
+4.   int count = 0;
+5.   int wrapCount = 3; 
+6. //...
+7. }
+8. class Events{
+9.   static Event plan;
+10.   static Event exec;  
+11. //...
+12. }
+13. class Plan{
+14.   int[] timeline = new int[5];
+15.   int currentToken = 0;
+16.   public synchronized void generate(){
+17.     timeline[0] = 10;
+18.     timeline[1] = 11;
+19.     timeline[2] = 12;
+20.     timeline[3] = 13;
+21.     timeline[4] = 14;
+22.     currentToken = 0;
+23.   }
+24. //...
+25.   public synchronized boolean done(){
+26.     return currentToken == 5;
+27.   } 
+28.   public synchronized void executeToken(){
+29.     currentToken++;
+30.   }
+31.   public synchronized void repair(){
+32.     currentToken = 0;
+33.   }
+34. }
+35. class Planner extends Thread{
+36.   Plan plan;
+37.   int count = 0;
+38.   public Planner(Plan plan){
+39.     this.plan = plan;
+40.     this.start();
+41.   }
+42.   public void run(){
+43.     count = Events.plan.count;
+44.     while(true){
+45.       if (count == Events.plan.count) {
+46.         if (count != Events.plan.count) {
+47. 	  throw new RuntimeException("bug");
+48. 	}
+49.         Events.plan.wait_for_event();
+50.       }
+51.       count = Events.plan.count;
+52.       plan.generate();
+53.       Events.exec.signal_event();
+54.     }
+55.   }
+56. }
+57. class Executive extends Thread{
+58.   Plan plan;
+59.   int count = 0;
+60.   public Executive(Plan plan){
+61.     this.plan = plan;
+62.     this.start();
+63.   }
+64.   public void run(){
+65.     count = Events.exec.count;
+66.     while(true){
+67.       Events.plan.signal_event();
+68.       if (count == Events.exec.count)
+69.         Events.exec.wait_for_event();
+70.       count = Events.exec.count;
+71.       while (!plan.done()) {
+72.         plan.executeToken();
+73.       }
+74.     }
+75.   }
+76. }
+77. class Diagnosis extends Thread{
+78.   Plan plan;
+79.   public Diagnosis(Plan plan){
+80.     this.plan = plan;
+81.     this.start();
+82.   }
+83.   public void run(){
+84.     while (true){
+85.       Events.exec.wait_for_event();
+86.       plan.repair();
+87.     }
+88.   }
+89. }
+90. class Observer extends Thread{
+91.   Plan plan;
+92. //...
+93.   public void run(){
+94.     int currentToken;
+95.     while (true){
+96.       currentToken = plan.getCurrentToken();
+97.     }
+98.   }
+99. }
+100. class Shared{
+101.   int x = 0;
+102. //...
+103. }
+104. class Task extends Thread{
+105.   Shared shared;
+106. //...
+107.   public void run(){
+108.     while (true) {
+109.       shared.write(0);
+110.     }
+111.   }
+112. }
+113. class Environment{
+114. //...
+115. }
+116. class RAXextended{
+117.   public static void main(String[] args){
+118.     int gc = 10;
+119.     int wc = 3;
+120.     if (args != null && args.length == 2) {
+121.       gc = Integer.parseInt(args[0]);
+122.       wc = Integer.parseInt(args[1]);
+123.     }
+124.     Events.initialize(wc);
+125.     Plan plan = new Plan();
+126.     new Planner(plan);
+127.     new Executive(plan);
+128.     new Diagnosis(plan);
+129.     Environment.create(gc);
+130.   }
+131. }
+```
+### instruction
+Fix the concurrency bugs in this program. Please note that some methods have been omitted. These methods are unrelated to concurrency bugs, perform any modifications to them would be considered violations. Please ensure that fixing doesn't introduce new bugs, such as deadlocks. Any modification of functionality of any function or code unrelated to concurrency bugs is incorrect and prohibited. Note that you don't need to reply with the entire source code after it's been fixed. Just provide the parts that were modified.For your answer, return one or more ChangeLog groups, each containing one or more fixes to the above code snippets. Each group must be formatted with the below instructions.Format instructions: Each ChangeLog group must start with a description of its included fixes. The group must then list one or more pairs of (OriginalCode, FixedCode) code snippets. Each OriginalCode snippet must list all consecutive original lines of code that must be replaced (including a few lines before and after the fixes), followed by the FixedCode snippet with all consecutive fixed lines of code that must replace the original lines of code (including the same few lines before and after the changes). In each pair, the OriginalCode and FixedCode snippets must start at the same source code line number N. Each listed code line, in both the OriginalCode and FixedCode snippets must be prefixed with [N] that matches the line index N in the above snippets , and then be prefixed with exactly the same whitespace indentation as the original snippets above.For example:
+ChangeLog:1@<file>
+FixDescription: <summary>.
+OriginalCode@4-6:
+[4] <white space> <original code line>
+[5] <white space> <original code line>
+[6] <white space> <original code line>
+FixedCode@4-6:
+[4] <white space> <fixed code line>
+[5] <white space> <fixed code line>
+[6] <white space> <fixed code line>
+OriginalCode@9-10:
+[9] <white space> <original code line>
+[10] <white space> <original code line>
+FixedCode@9-9: 
+[9] <white space> <fixed code line>
+ChangeLog:2@<file>
+FixDescription: <summary>.
+OriginalCode@15-16:
+[15] <white space> <original code line>
+[16]<white space> <original code line>
+FixedCode@15-17:
+[15] <white space> <fixed code line>
+[16] <white space> <fixed code line>
+[17] <white space> <fixed code line>
+OriginalCode@23-23:
+[23] <white space> <original code line>
+FixedCode@23-23:
+[23] <white space> <fixed code line>
+    

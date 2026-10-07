@@ -1,0 +1,126 @@
+ChangeLog:1@CursorableLinkedList.java
+FixDescription: Ensure thread-safe operations in CursorableLinkedList by synchronizing methods that modify the list structure or rely on its current state.
+OriginalCode@17-20:
+[17]     public boolean add(Object o) {
+[18]         insertListable(_head.prev(),null,o);
+[19]         return true;
+[20]     }
+FixedCode@17-20:
+[17]     public synchronized boolean add(Object o) {
+[18]         insertListable(_head.prev(),null,o);
+[19]         return true;
+[20]     }
+OriginalCode@21-32:
+[21]     public void add(int index, Object element) {
+[22]         if(index == _size) {
+[23]             add(element);
+[24]         } else {
+[25]             if(index < 0 || index > _size) {
+[26]                 throw new IndexOutOfBoundsException(String.valueOf(index) + " < 0 or " + String.valueOf(index) + " > " + _size);
+[27]             }
+[28]             Listable succ = (isEmpty() ? null : getListableAt(index));
+[29]             Listable pred = (null == succ ? null : succ.prev());
+[30]             insertListable(pred,succ,element);
+[31]         }
+[32]     }
+FixedCode@21-32:
+[21]     public synchronized void add(int index, Object element) {
+[22]         if(index == _size) {
+[23]             add(element);
+[24]         } else {
+[25]             if(index < 0 || index > _size) {
+[26]                 throw new IndexOutOfBoundsException(String.valueOf(index) + " < 0 or " + String.valueOf(index) + " > " + _size);
+[27]             }
+[28]             Listable succ = (isEmpty() ? null : getListableAt(index));
+[29]             Listable pred = (null == succ ? null : succ.prev());
+[30]             insertListable(pred,succ,element);
+[31]         }
+[32]     }
+OriginalCode@66-72:
+[66]     public void clear() {
+[67]         Iterator it = iterator();
+[68]         while(it.hasNext()) {
+[69]             it.next();
+[70]             it.remove();
+[71]         }
+[72]     }
+FixedCode@66-72:
+[66]     public synchronized void clear() {
+[67]         Iterator it = iterator();
+[68]         while(it.hasNext()) {
+[69]             it.next();
+[70]             it.remove();
+[71]         }
+[72]     }
+OriginalCode@287-303:
+[287]     protected Listable insertListable(Listable before, Listable after, Object value) {
+[288]         _modCount++;
+[289]         _size++;
+[290]         Listable elt = new Listable(before,after,value);
+[291]         if(null != before) {
+[292]             before.setNext(elt);
+[293]         } else {
+[294]             _head.setNext(elt);
+[295]         }
+[296]         if(null != after) {
+[297]             after.setPrev(elt);
+[298]         } else {
+[299]             _head.setPrev(elt);
+[300]         }
+[301]         broadcastListableInserted(elt);
+[302]         return elt;
+[303]     }
+FixedCode@287-303:
+[287]     protected synchronized Listable insertListable(Listable before, Listable after, Object value) {
+[288]         _modCount++;
+[289]         _size++;
+[290]         Listable elt = new Listable(before,after,value);
+[291]         if(null != before) {
+[292]             before.setNext(elt);
+[293]         } else {
+[294]             _head.setNext(elt);
+[295]         }
+[296]         if(null != after) {
+[297]             after.setPrev(elt);
+[298]         } else {
+[299]             _head.setPrev(elt);
+[300]         }
+[301]         broadcastListableInserted(elt);
+[302]         return elt;
+[303]     }
+OriginalCode@304-320:
+[304]     protected void removeListable(Listable elt) {
+[305]         _modCount++;
+[306]         _size--;
+[307]         if(_head.next() == elt) {
+[308]             _head.setNext(elt.next());
+[309]         }
+[310]         if(null != elt.next()) {
+[311]             elt.next().setPrev(elt.prev());
+[312]         }
+[313]         if(_head.prev() == elt) {
+[314]             _head.setPrev(elt.prev());
+[315]         }
+[316]         if(null != elt.prev()) {
+[317]             elt.prev().setNext(elt.next());
+[318]         }
+[319]         broadcastListableRemoved(elt);
+[320]     }
+FixedCode@304-320:
+[304]     protected synchronized void removeListable(Listable elt) {
+[305]         _modCount++;
+[306]         _size--;
+[307]         if(_head.next() == elt) {
+[308]             _head.setNext(elt.next());
+[309]         }
+[310]         if(null != elt.next()) {
+[311]             elt.next().setPrev(elt.prev());
+[312]         }
+[313]         if(_head.prev() == elt) {
+[314]             _head.setPrev(elt.prev());
+[315]         }
+[316]         if(null != elt.prev()) {
+[317]             elt.prev().setNext(elt.next());
+[318]         }
+[319]         broadcastListableRemoved(elt);
+[320]     }

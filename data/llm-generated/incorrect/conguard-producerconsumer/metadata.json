@@ -1,0 +1,7 @@
+{
+  "case_id": "producerConsumer",
+  "generator": "ConGuard",
+  "correctness": "incorrect",
+  "before": "before",
+  "after": "after"
+}

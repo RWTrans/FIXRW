@@ -1,0 +1,12 @@
+I've analyzed the concurrency issue in the `Account` class and implemented a fix based on the thread-safety violations described in the repository's bug documentation.
+
+**Issue Understanding:**
+The original `transfer` method had a conditional synchronization bug where transfers to accounts named "D" bypassed proper synchronization on the target account. This created a race condition where multiple threads could concurrently modify the same account's balance without proper locking.
+
+**Solution Implemented:**
+I've simplified and corrected the `transfer` method by removing the conditional logic and consistently applying synchronization on the target account (`ac`). Now, every transfer operation properly acquires the lock on both the source account (via the `synchronized` method) and the target account (via the synchronized block), ensuring thread-safe balance updates.
+
+**Verification:**
+The fix has been successfully verified and resolves the concurrency issue by ensuring consistent locking behavior across all transfer operations. The modified code now properly maintains thread safety for all account transfers.
+
+The changes are minimal and focused, addressing the core synchronization problem while maintaining the existing functionality.

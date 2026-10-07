@@ -1,0 +1,87 @@
+ChangeLog:1@RAXextended.java
+FixDescription: Fix the potential race condition and incorrect synchronization in Planner's run method. The check and the action based on Events.plan.count should be atomic to avoid missed updates. Also, the wait_for_event and signal_event methods should be properly synchronized on the Event object to prevent IllegalMonitorStateException.
+OriginalCode@43-54:
+[43]         count = Events.plan.count;
+[44]         while(true){
+[45]             if (count == Events.plan.count) {
+[46]                 if (count != Events.plan.count) {
+[47]                     throw new RuntimeException("bug");
+[48]                 }
+[49]                 Events.plan.wait_for_event();
+[50]             }
+[51]             count = Events.plan.count;
+[52]             plan.generate();
+[53]             Events.exec.signal_event();
+[54]         }
+FixedCode@43-54:
+[43]         while(true){
+[44]             synchronized(Events.plan) {
+[45]                 while (count == Events.plan.count) {
+[46]                     try {
+[47]                         Events.plan.wait();
+[48]                     } catch (InterruptedException e) {
+[49]                         Thread.currentThread().interrupt();
+[50]                         return;
+[51]                     }
+[52]                 }
+[53]                 count = Events.plan.count;
+[54]             }
+[55]             plan.generate();
+[56]             synchronized(Events.exec) {
+[57]                 Events.exec.notify();
+[58]             }
+[59]         }
+
+ChangeLog:2@RAXextended.java
+FixDescription: Ensure proper synchronization in Executive's run method to avoid IllegalMonitorStateException and ensure proper signaling and waiting logic.
+OriginalCode@65-74:
+[65]         count = Events.exec.count;
+[66]         while(true){
+[67]             Events.plan.signal_event();
+[68]             if (count == Events.exec.count)
+[69]                 Events.exec.wait_for_event();
+[70]             count = Events.exec.count;
+[71]             while (!plan.done()) {
+[72]                 plan.executeToken();
+[73]             }
+[74]         }
+FixedCode@65-74:
+[65]         while(true){
+[66]             synchronized(Events.plan) {
+[67]                 Events.plan.notify();
+[68]             }
+[69]             synchronized(Events.exec) {
+[70]                 while (count == Events.exec.count) {
+[71]                     try {
+[72]                         Events.exec.wait();
+[73]                     } catch (InterruptedException e) {
+[74]                         Thread.currentThread().interrupt();
+[75]                         return;
+[76]                     }
+[77]                 }
+[78]                 count = Events.exec.count;
+[79]             }
+[80]             while (!plan.done()) {
+[81]                 plan.executeToken();
+[82]             }
+[83]         }
+
+ChangeLog:3@RAXextended.java
+FixDescription: Correct synchronization in Diagnosis's run method to prevent IllegalMonitorStateException by ensuring that wait is called on the correct object monitor.
+OriginalCode@84-87:
+[84]     while (true){
+[85]         Events.exec.wait_for_event();
+[86]         plan.repair();
+[87]     }
+FixedCode@84-87:
+[84]     while (true){
+[85]         synchronized(Events.exec) {
+[86]             try {
+[87]                 Events.exec.wait();
+[88]             } catch (InterruptedException e) {
+[89]                 Thread.currentThread().interrupt();
+[90]                 return;
+[91]             }
+[92]         }
+[93]         plan.repair();
+[94]     }

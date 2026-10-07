@@ -1,0 +1,74 @@
+ChangeLog:1@AlarmClock.java
+FixDescription: Ensure that the Monitor's tick method and the wakeme method are properly synchronized to avoid race conditions and ensure that the wait and notifyAll calls are correctly paired and protected.
+OriginalCode@69-82:
+[69]     void tick() {
+[70]         synchronized (this) {
+[71]             now++;
+[72]             if (!waitList.isEmpty()) {
+[73]                 MyObject first = (MyObject) waitList.firstElement();
+[74]                 if (first.time() == now) {
+[75]                     MyObject wakeup = first;
+[76]                     waitList.removeElementAt(0);
+[77]                     synchronized (wakeup) {
+[78]                         wakeup.notifyAll();
+[79]                     }
+[80]                 }
+[81]             }
+[82]         }
+FixedCode@69-82:
+[69]     void tick() {
+[70]         synchronized (this) {
+[71]             now++;
+[72]             if (!waitList.isEmpty()) {
+[73]                 MyObject first = (MyObject) waitList.firstElement();
+[74]                 if (first.time() == now) {
+[75]                     MyObject wakeup = first;
+[76]                     waitList.removeElementAt(0);
+[77]                     synchronized (wakeup) {
+[78]                         wakeup.notifyAll();
+[79]                     }
+[80]                 }
+[81]             }
+[82]         }
+
+ChangeLog:2@AlarmClock.java
+FixDescription: Ensure that the Monitor's wakeme method properly handles synchronization and waiting on the correct object to avoid potential deadlocks and ensure that the client threads wait and wake up correctly.
+OriginalCode@84-103:
+[84]     void wakeme(int id, int interval) {
+[85]         int waketime;
+[86]         MyObject lock;
+[87]         synchronized (this) {
+[88]             waketime = now + interval;
+[89]             if (waketime > max) {
+[90]                 return;
+[91]             }
+[92]             lock = waitList.createLock(waketime);
+[93]         }
+[94]         try {
+[95]             synchronized (waitList.getLock(waketime)) {
+[96]                 try {
+[97]                     waitList.getLock(waketime).wait();
+[98]                 } catch (InterruptedException e) {
+[99]                 }
+[100]             }
+[101]         } catch (IndexOutOfBoundsException e) {
+[102]         }
+[103]     }
+FixedCode@84-103:
+[84]     void wakeme(int id, int interval) {
+[85]         int waketime;
+[86]         MyObject lock;
+[87]         synchronized (this) {
+[88]             waketime = now + interval;
+[89]             if (waketime > max) {
+[90]                 return;
+[91]             }
+[92]             lock = waitList.createLock(waketime);
+[93]         }
+[94]         synchronized (lock) {
+[95]             try {
+[96]                 lock.wait();
+[97]             } catch (InterruptedException e) {
+[98]             }
+[99]         }
+[100]     }

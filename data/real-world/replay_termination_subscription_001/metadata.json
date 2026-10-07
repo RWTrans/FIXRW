@@ -1,0 +1,6 @@
+{
+  "case_id": "replay_termination_subscription_001",
+  "repository": "ReactiveX/RxJava",
+  "project_version": "3.0.0-SNAPSHOT",
+  "test_entry": "src/test/java/io/reactivex/rxjava3/processors/ReplayProcessorTest.java#terminationSubscriptionRaceUnbounded; src/test/java/io/reactivex/rxjava3/processors/ReplayProcessorTest.java#terminationSubscriptionRaceSizeBound; src/test/java/io/reactivex/rxjava3/processors/ReplayProcessorTest.java#terminationSubscriptionRaceTimeBound; src/test/java/io/reactivex/rxjava3/subjects/ReplaySubjectTest.java#terminationSubscriptionRaceUnbounded; src/test/java/io/reactivex/rxjava3/subjects/ReplaySubjectTest.java#terminationSubscriptionRaceSizeBound; src/test/java/io/reactivex/rxjava3/subjects/ReplaySubjectTest.java#terminationSubscriptionRaceTimeBound"
+}

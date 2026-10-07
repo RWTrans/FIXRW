@@ -1,0 +1,7 @@
+{
+  "case_id": "atmoerror",
+  "generator": "Prometheus",
+  "correctness": "incorrect",
+  "before": "before",
+  "after": "after"
+}

@@ -1,0 +1,113 @@
+ChangeLog:1@AlarmClock.java
+FixDescription: Ensure atomicity and thread safety in Monitor.tick() and Monitor.wakeme() methods by synchronizing on the same object when modifying and accessing the waitList.
+OriginalCode@69-82:
+```java
+[69]     void tick() {
+[70]         synchronized (this) {
+[71]             now++;
+[72]             if (!waitList.isEmpty()) {
+[73]                 MyObject first = (MyObject) waitList.firstElement();
+[74]                 if (first.time() == now) {
+[75]                     MyObject wakeup = first;
+[76]                     waitList.removeElementAt(0);
+[77]                     synchronized (wakeup) {
+[78]                         wakeup.notifyAll();
+[79]                     }
+[80]                 }
+[81]             }
+[82]         }
+```
+FixedCode@69-82:
+```java
+[69]     void tick() {
+[70]         synchronized (waitList) {
+[71]             now++;
+[72]             if (!waitList.isEmpty()) {
+[73]                 MyObject first = (MyObject) waitList.firstElement();
+[74]                 if (first.time() == now) {
+[75]                     MyObject wakeup = first;
+[76]                     waitList.removeElementAt(0);
+[77]                     synchronized (wakeup) {
+[78]                         wakeup.notifyAll();
+[79]                     }
+[80]                 }
+[81]             }
+[82]         }
+```
+OriginalCode@84-93:
+```java
+[84]     void wakeme(int id, int interval) {
+[85]         int waketime;
+[86]         MyObject lock;
+[87]         synchronized (this) {
+[88]             waketime = now + interval;
+[89]             if (waketime > max) {
+[90]                 return;
+[91]             }
+[92]             lock = waitList.createLock(waketime);
+[93]         }
+```
+FixedCode@84-93:
+```java
+[84]     void wakeme(int id, int interval) {
+[85]         int waketime;
+[86]         MyObject lock;
+[87]         synchronized (waitList) {
+[88]             waketime = now + interval;
+[89]             if (waketime > max) {
+[90]                 return;
+[91]             }
+[92]             lock = waitList.createLock(waketime);
+[93]         }
+```
+
+ChangeLog:2@AlarmClock.java
+FixDescription: Ensure proper synchronization when accessing and modifying the waitList in MyLinkedList to prevent concurrent modification issues.
+OriginalCode@155-175:
+```java
+[155]     MyObject createLock(int n) {
+[156]         MyObject temp;
+[157]         int key;
+[158]         for (int i = 0; i < size; i++) {
+[159]             key = ((MyObject) list[i]).time;
+[160]             if (n == key) {
+[161]                 temp = (MyObject) list[i];
+[162]                 return temp;
+[163]             }
+[164]         }
+[165]         MyObject lock = new MyObject(n);
+[166]         for (int i = 0; i < size; i++) {
+[167]             key = ((MyObject) list[i]).time;
+[168]             if (n < key) {
+[169]                 this.insertElementAt((Object) lock, i);
+[170]                 return lock;
+[171]             }
+[172]         }
+[173]         this.addElement((Object) lock); 
+[174]         return lock;
+[175]     }
+```
+FixedCode@155-175:
+```java
+[155]     synchronized MyObject createLock(int n) {
+[156]         MyObject temp;
+[157]         int key;
+[158]         for (int i = 0; i < size; i++) {
+[159]             key = ((MyObject) list[i]).time;
+[160]             if (n == key) {
+[161]                 temp = (MyObject) list[i];
+[162]                 return temp;
+[163]             }
+[164]         }
+[165]         MyObject lock = new MyObject(n);
+[166]         for (int i = 0; i < size; i++) {
+[167]             key = ((MyObject) list[i]).time;
+[168]             if (n < key) {
+[169]                 this.insertElementAt((Object) lock, i);
+[170]                 return lock;
+[171]             }
+[172]         }
+[173]         this.addElement((Object) lock); 
+[174]         return lock;
+[175]     }
+```

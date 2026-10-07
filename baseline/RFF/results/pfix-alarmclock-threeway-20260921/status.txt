@@ -1,0 +1,2 @@
+EXIT=2
+WALL_MS=1534

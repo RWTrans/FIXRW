@@ -1,0 +1,34 @@
+# Trace-Based Selective Scheduling
+# =================================
+# 
+# This is a TWO-PHASE approach:
+# 
+# Phase 1 (First Run - Trace Collection):
+#   - Run the program normally
+#   - All field accesses are recorded to trace_events.txt
+#   - At end of execution, analyze trace against selective_config.txt
+#   - Extract variables accessed at configured lines
+#   - Save extracted variables to interested_variables.txt
+# 
+# Phase 2 (Second Run - Selective Scheduling):
+#   - Load interested_variables.txt
+#   - Only schedule field accesses to those variables
+#   - Other field accesses execute directly without scheduling
+#
+# Usage:
+#   1. Create selective_config.txt with lines: ClassName:lineNumber
+#   2. Run program once (collects trace)
+#   3. Run program again (selective scheduling)
+#
+# Format:
+#   ClassName:lineNumber           - Extract variables at this line
+#   ClassName.fieldName:lineNumber - Extract specific field at this line
+#
+# Lines starting with # are comments
+
+# Example: Extract variables accessed at line 25 of CounterThread
+edu.tamu.aser.rff.CounterThread:25
+
+# Add more locations as needed
+# edu.tamu.aser.rff.CounterThread:42
+# edu.tamu.aser.rff.WriterThread:15

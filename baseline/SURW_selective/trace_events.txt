@@ -1,0 +1,4 @@
+edu.tamu.aser.rff.CounterThread:25 CounterThread.counter READ by main
+edu.tamu.aser.rff.CounterThread:26 CounterThread.counter WRITE by main
+edu.tamu.aser.rff.CounterThread:30 CounterThread.value READ by main
+edu.tamu.aser.rff.WriterThread:15 WriterThread.data WRITE by main

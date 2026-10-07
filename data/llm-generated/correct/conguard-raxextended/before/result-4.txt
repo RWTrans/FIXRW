@@ -1,0 +1,99 @@
+ChangeLog:1@RAXextended.java
+FixDescription: Ensure proper synchronization when accessing and modifying the static Event objects in the Events class. The original code has potential race conditions due to unsynchronized access to shared mutable state (Events.plan.count and Events.exec.count). The fix introduces synchronized methods for accessing and modifying these counts, ensuring thread safety.
+OriginalCode@8-12:
+```java
+8. class Events{
+9.   static Event plan;
+10.  static Event exec;  
+11. //...
+12. }
+```
+FixedCode@8-12:
+```java
+8. class Events{
+9.   private static final Object planLock = new Object();
+10.  private static final Object execLock = new Object();
+11.  static Event plan;
+12.  static Event exec;
+13.  public static void incrementPlanCount() {
+14.      synchronized (planLock) {
+15.          plan.count++;
+16.      }
+17.  }
+18.  public static void incrementExecCount() {
+19.      synchronized (execLock) {
+20.          exec.count++;
+21.      }
+22.  }
+23.  public static int getPlanCount() {
+24.      synchronized (planLock) {
+25.          return plan.count;
+26.      }
+27.  }
+28.  public static int getExecCount() {
+29.      synchronized (execLock) {
+30.          return exec.count;
+31.      }
+32.  }
+33.  //...
+34. }
+```
+
+ChangeLog:2@RAXextended.java
+FixDescription: Modify the Planner and Executive threads to use the newly introduced synchronized methods for accessing and modifying the Event counts. This change ensures that all accesses and modifications to the Event counts are properly synchronized, preventing race conditions.
+OriginalCode@43-54:
+```java
+43.     count = Events.plan.count;
+44.     while(true){
+45.       if (count == Events.plan.count) {
+46.         if (count != Events.plan.count) {
+47. 	  throw new RuntimeException("bug");
+48. 	}
+49.         Events.plan.wait_for_event();
+50.       }
+51.       count = Events.plan.count;
+52.       plan.generate();
+53.       Events.exec.signal_event();
+54.     }
+```
+FixedCode@43-54:
+```java
+43.     count = Events.getPlanCount();
+44.     while(true){
+45.       if (count == Events.getPlanCount()) {
+46.         if (count != Events.getPlanCount()) {
+47. 	  throw new RuntimeException("bug");
+48. 	}
+49.         Events.plan.wait_for_event();
+50.       }
+51.       count = Events.getPlanCount();
+52.       plan.generate();
+53.       Events.incrementExecCount();
+54.     }
+```
+OriginalCode@65-74:
+```java
+65.     count = Events.exec.count;
+66.     while(true){
+67.       Events.plan.signal_event();
+68.       if (count == Events.exec.count)
+69.         Events.exec.wait_for_event();
+70.       count = Events.exec.count;
+71.       while (!plan.done()) {
+72.         plan.executeToken();
+73.       }
+74.     }
+```
+FixedCode@65-74:
+```java
+65.     count = Events.getExecCount();
+66.     while(true){
+67.       Events.incrementPlanCount();
+68.       if (count == Events.getExecCount())
+69.         Events.exec.wait_for_event();
+70.       count = Events.getExecCount();
+71.       while (!plan.done()) {
+72.         plan.executeToken();
+73.       }
+74.     }
+```

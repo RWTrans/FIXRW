@@ -1,0 +1,6 @@
+{
+  "case_id": "pivot_concurrency_merge_001",
+  "repository": "ReactiveX/RxJava",
+  "project_version": "0.19.2-SNAPSHOT",
+  "test_entry": "rxjava-core/src/test/java/rx/internal/operators/OperatorPivotTest.java#testConcurrencyAndSerialization"
+}

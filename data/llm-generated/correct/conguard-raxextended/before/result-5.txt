@@ -1,0 +1,55 @@
+ChangeLog:1@RAXextended.java
+FixDescription: Fix the potential race condition in Planner's run method where the check and use of Events.plan.count can lead to inconsistent states due to unsynchronized access.
+OriginalCode@43-51:
+[43]         count = Events.plan.count;
+[44]         while(true){
+[45]           if (count == Events.plan.count) {
+[46]             if (count != Events.plan.count) {
+[47] 	          throw new RuntimeException("bug");
+[48] 	        }
+[49]             Events.plan.wait_for_event();
+[50]           }
+[51]           count = Events.plan.count;
+FixedCode@43-51:
+[43]         synchronized(Events.plan) {
+[44]             count = Events.plan.count;
+[45]             while(true){
+[46]                 if (count == Events.plan.count) {
+[47]                     Events.plan.wait_for_event();
+[48]                 }
+[49]                 count = Events.plan.count;
+[50]             }
+[51]         }
+
+ChangeLog:2@RAXextended.java
+FixDescription: Ensure synchronization when accessing Events.exec.count in the Executive's run method to prevent race conditions.
+OriginalCode@65-70:
+[65]         count = Events.exec.count;
+[66]         while(true){
+[67]           Events.plan.signal_event();
+[68]           if (count == Events.exec.count)
+[69]             Events.exec.wait_for_event();
+[70]           count = Events.exec.count;
+FixedCode@65-70:
+[65]         synchronized(Events.exec) {
+[66]             count = Events.exec.count;
+[67]             while(true){
+[68]                 Events.plan.signal_event();
+[69]                 if (count == Events.exec.count)
+[70]                     Events.exec.wait_for_event();
+[71]                 count = Events.exec.count;
+[72]             }
+[73]         }
+
+ChangeLog:3@RAXextended.java
+FixDescription: Add missing synchronization in Observer's run method to safely read the currentToken from Plan.
+OriginalCode@95-97:
+[95]         while (true){
+[96]           currentToken = plan.getCurrentToken();
+[97]         }
+FixedCode@95-97:
+[95]         while (true){
+[96]           synchronized(plan) {
+[97]               currentToken = plan.getCurrentToken();
+[98]           }
+[99]         }

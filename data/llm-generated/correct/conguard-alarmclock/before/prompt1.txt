@@ -1,0 +1,228 @@
+##### You were given a code snippet that may contain concurrency bugs. Some methods unrelated to the concurrency bugs have already been filtered out.
+### source code
+#### AlarmClock.java
+```java
+1. package alarmclock;
+2. public class AlarmClock {
+3.     public static void main(String[] args) {
+4.         int maxTime = 5;
+5.         Monitor m = new Monitor(maxTime);
+6.         new Clock(1, m, maxTime).start();
+7.         Client c1 = new Client(2, m, 1);
+8.         Client c2 = new Client(3, m, 2);
+9.         Client c3 = new Client(4, m, 3);
+10.         Client c4 = new Client(5, m, 4);
+11.         Client c5 = new Client(6, m, 5);
+12.         Client c6 = new Client(7, m, 6);
+13.         Client c7 = new Client(8, m, 7);
+14.         Client c8 = new Client(9, m, 8);
+15.         c1.start();
+16.         c2.start();
+17.         c3.start();
+18.         c4.start();
+19.         c5.start();
+20.         c6.start();
+21.         c7.start();
+22.         c8.start();
+23.     }
+24. }
+25. class Clock extends Thread {
+26.     private int name;
+27.     private Monitor monitor;
+28.     private int max;
+29.     public Clock(int n, Monitor m, int maxTime) {
+30.         name = n;
+31.         monitor = m;
+32.         max = maxTime;
+33.     }
+34.     public void run() {
+35.         while (monitor.getTime() < max) {
+36.             monitor.tick();
+37.             try {
+38.                 Thread.sleep(10);
+39.             } catch (InterruptedException e) {
+40.             }
+41.         }
+42.     }
+43. }
+44. class Client extends Thread {
+45.     private int name;
+46.     private Monitor monitor;
+47.     private int id;
+48.     public Client(int n, Monitor m, int i) {
+49.         name = n;
+50.         monitor = m;
+51.         id = i;
+52.     }
+53.     public void run() {
+54.         int maxSleepTime = 5;
+55.         int interval;
+56.         interval = 2;
+57.         monitor.wakeme(id, interval);
+58.     }
+59. }
+60. class Monitor {
+61.     private int now;
+62.     private MyLinkedList waitList;
+63.     private int max;
+64.     Monitor(int maxTime) {
+65.         now = 0;
+66.         waitList = new MyLinkedList();
+67.         max = maxTime;
+68.     }
+69.     void tick() {
+70.         synchronized (this) {
+71.             now++;
+72.             if (!waitList.isEmpty()) {
+73.                 MyObject first = (MyObject) waitList.firstElement();
+74.                 if (first.time() == now) {
+75.                     MyObject wakeup = first;
+76.                     waitList.removeElementAt(0);
+77.                     synchronized (wakeup) {
+78.                         wakeup.notifyAll();
+79.                     }
+80.                 }
+81.             }
+82.         }
+83.     }
+84.     void wakeme(int id, int interval) {
+85.         int waketime;
+86.         MyObject lock;
+87.         synchronized (this) {
+88.             waketime = now + interval;
+89.             if (waketime > max) {
+90.                 return;
+91.             }
+92.             lock = waitList.createLock(waketime);
+93.         }
+94.         try {
+95.             synchronized (waitList.getLock(waketime)) {
+96.                 try {
+97.                     waitList.getLock(waketime).wait();
+98.                 } catch (InterruptedException e) {
+99.                 }
+100.             }
+101.         } catch (IndexOutOfBoundsException e) {
+102.         }
+103.     }
+104.     int getTime() {
+105.         return now;
+106.     }
+107. }
+108. class MyObject {
+109.     public int time;
+110.     MyObject(int n) {
+111.         time = n;
+112.     }
+113.     public int time() {
+114.         return time;
+115.     }
+116. }
+117. class MyLinkedList {
+118.     private Object[] list = new Object[2];
+119.     private int capacity = 2;
+120.     private int size = 0;
+121.     public boolean isEmpty() {
+122.         return size == 0;
+123.     }
+124.     public boolean isFull() {
+125.         return size == capacity;
+126.     }
+127. //...
+128.     public void insertElementAt(Object obj, int index) {
+129.         if (!this.isFull()) {
+130.             for (int i = size - 1; i >= index; i--) {
+131.                 list[i + 1] = list[i];
+132.             }
+133.             list[index] = obj;
+134.             size++;
+135.         }
+136.     }
+137.     public void addElement(Object obj) {
+138.         if (!this.isFull()) {
+139.             list[size] = obj;
+140.             size++;
+141.         }
+142.     }
+143.     public Object firstElement() {
+144.         return list[0];
+145.     }
+146.     public void removeElementAt(int index) {
+147.         if (!this.isEmpty()) {
+148.             for (int i = index; i < (size - 1); i++) {
+149.                 list[i] = list[i + 1];
+150.             }
+151.             list[size - 1] = null;
+152.             size--;
+153.         }
+154.     }
+155.     MyObject createLock(int n) {
+156.         MyObject temp;
+157.         int key;
+158.         for (int i = 0; i < size; i++) {
+159.             key = ((MyObject) list[i]).time;
+160.             if (n == key) {
+161.                 temp = (MyObject) list[i];
+162.                 return temp;
+163.             }
+164.         }
+165.         MyObject lock = new MyObject(n);
+166.         for (int i = 0; i < size; i++) {
+167.             key = ((MyObject) list[i]).time;
+168.             if (n < key) {
+169.                 this.insertElementAt((Object) lock, i);
+170.                 return lock;
+171.             }
+172.         }
+173.         this.addElement((Object) lock); 
+174.         return lock;
+175.     }
+176.     MyObject getLock(int n) {
+177.         MyObject temp;
+178.         int m;
+179.         for (int i = 0; i < size; i++) {
+180.             m = ((MyObject) list[i]).time;
+181.             if (n == m) {
+182.                 temp = (MyObject) list[i];
+183.                 return temp;
+184.             }
+185.         }
+186.         throw new IndexOutOfBoundsException();
+187.     }
+188. }
+```
+### instruction
+Fix the concurrency bugs in this program.
+1. Please note that some methods have been omitted. These methods are unrelated to concurrency bugs, perform any modifications to them would be considered violations.
+2. Please ensure that fixing doesn't introduce new bugs, such as deadlocks.
+3. Any modification of functionality of any function or code unrelated to concurrency bugs is incorrect and prohibited.
+ Note that you don't need to reply with the entire source code after it's been fixed. Just provide the parts that were modified.For your answer, return one or more ChangeLog groups, each containing one or more fixes to the above code snippets. Each group must be formatted with the below instructions.Format instructions: Each ChangeLog group must start with a description of its included fixes. The group must then list one or more pairs of (OriginalCode, FixedCode) code snippets. Each OriginalCode snippet must list all consecutive original lines of code that must be replaced (including a few lines before and after the fixes), followed by the FixedCode snippet with all consecutive fixed lines of code that must replace the original lines of code (including the same few lines before and after the changes). In each pair, the OriginalCode and FixedCode snippets must start at the same source code line number N. Each listed code line, in both the OriginalCode and FixedCode snippets must be prefixed with [N] that matches the line index N in the above snippets , and then be prefixed with exactly the same whitespace indentation as the original snippets above.For example:
+ChangeLog:1@<file>
+FixDescription: <summary>.
+OriginalCode@4-6:
+[4] <white space> <original code line>
+[5] <white space> <original code line>
+[6] <white space> <original code line>
+FixedCode@4-6:
+[4] <white space> <fixed code line>
+[5] <white space> <fixed code line>
+[6] <white space> <fixed code line>
+OriginalCode@9-10:
+[9] <white space> <original code line>
+[10] <white space> <original code line>
+FixedCode@9-9: 
+[9] <white space> <fixed code line>
+ChangeLog:2@<file>
+FixDescription: <summary>.
+OriginalCode@15-16:
+[15] <white space> <original code line>
+[16]<white space> <original code line>
+FixedCode@15-17:
+[15] <white space> <fixed code line>
+[16] <white space> <fixed code line>
+[17] <white space> <fixed code line>
+OriginalCode@23-23:
+[23] <white space> <original code line>
+FixedCode@23-23:
+[23] <white space> <fixed code line>
+    

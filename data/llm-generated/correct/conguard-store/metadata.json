@@ -1,0 +1,7 @@
+{
+  "case_id": "store",
+  "generator": "ConGuard",
+  "correctness": "correct",
+  "before": "before",
+  "after": "after"
+}

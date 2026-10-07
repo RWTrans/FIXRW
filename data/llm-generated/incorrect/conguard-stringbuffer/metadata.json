@@ -1,0 +1,7 @@
+{
+  "case_id": "stringbuffer",
+  "generator": "ConGuard",
+  "correctness": "incorrect",
+  "before": "before",
+  "after": "after"
+}

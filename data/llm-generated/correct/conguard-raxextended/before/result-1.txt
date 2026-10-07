@@ -1,0 +1,80 @@
+ChangeLog:1@RAXextended.java
+FixDescription: Ensure proper synchronization when accessing shared Event objects to prevent race conditions and ensure thread-safe operations.
+OriginalCode@43-56:
+[43]     count = Events.plan.count;
+[44]     while(true){
+[45] //System.out.println("planner loop with count ="+count+", Events.plan.count ="+Events.plan.count);
+[46]       if (count == Events.plan.count) {
+[47] //System.out.println("testing with count ="+count+", Events.plan.count ="+Events.plan.count);
+[48]         if (count != Events.plan.count) {
+[49]           throw new RuntimeException("bug");
+[50]         }
+[51]         Events.plan.wait_for_event();
+[52]       }
+[53]       count = Events.plan.count;
+[54]       plan.generate();
+[55]       Events.exec.signal_event();
+[56]     }
+FixedCode@43-56:
+[43]     synchronized(Events.plan) {
+[44]         count = Events.plan.count;
+[45]     }
+[46]     while(true){
+[47]         synchronized(Events.plan) {
+[48]             if (count == Events.plan.count) {
+[49]                 Events.plan.wait_for_event();
+[50]             }
+[51]             count = Events.plan.count;
+[52]         }
+[53]         plan.generate();
+[54]         synchronized(Events.exec) {
+[55]             Events.exec.signal_event();
+[56]         }
+[57]     }
+
+ChangeLog:2@RAXextended.java
+FixDescription: Ensure proper synchronization when accessing shared Event objects in the Executive thread to avoid race conditions.
+OriginalCode@64-74:
+[64]     count = Events.exec.count;
+[65]     while(true){
+[66] //System.out.println("executive loop");
+[67]       Events.plan.signal_event();
+[68]       if (count == Events.exec.count)
+[69]         Events.exec.wait_for_event();
+[70]       count = Events.exec.count;
+[71]       while (!plan.done()) {
+[72]         plan.executeToken();
+[73]       }
+[74]     }
+FixedCode@64-74:
+[64]     synchronized(Events.exec) {
+[65]         count = Events.exec.count;
+[66]     }
+[67]     while(true){
+[68]         synchronized(Events.plan) {
+[69]             Events.plan.signal_event();
+[70]         }
+[71]         synchronized(Events.exec) {
+[72]             if (count == Events.exec.count) {
+[73]                 Events.exec.wait_for_event();
+[74]             }
+[75]             count = Events.exec.count;
+[76]         }
+[77]         while (!plan.done()) {
+[78]             plan.executeToken();
+[79]         }
+[80]     }
+
+ChangeLog:3@RAXextended.java
+FixDescription: Add synchronization to the Observer thread to safely read the currentToken from the Plan object.
+OriginalCode@93-96:
+[93]     while (true){
+[94] //System.out.println("observer loop");
+[95]       currentToken = plan.getCurrentToken();
+[96]     }
+FixedCode@93-96:
+[93]     while (true){
+[94]         synchronized(plan) {
+[95]             currentToken = plan.getCurrentToken();
+[96]         }
+[97]     }

@@ -1,0 +1,70 @@
+ChangeLog:1@RAXextended.java
+FixDescription: Fix potential race condition and incorrect synchronization in Planner and Executive threads. The `Events.plan.count` and `Events.exec.count` should be accessed in a synchronized manner to prevent visibility issues across threads. Additionally, the `wait_for_event` and `signal_event` methods should be called within a synchronized block related to the object they are modifying or waiting on.
+OriginalCode@43-54:
+[43]     count = Events.plan.count;
+[44]     while(true){
+[45]       if (count == Events.plan.count) {
+[46]         if (count != Events.plan.count) {
+[47] 	  throw new RuntimeException("bug");
+[48] 	}
+[49]         Events.plan.wait_for_event();
+[50]       }
+[51]       count = Events.plan.count;
+[52]       plan.generate();
+[53]       Events.exec.signal_event();
+[54]     }
+FixedCode@43-54:
+[43]     synchronized (Events.plan) {
+[44]         count = Events.plan.count;
+[45]     }
+[46]     while(true){
+[47]       synchronized (Events.plan) {
+[48]         if (count == Events.plan.count) {
+[49]             Events.plan.wait_for_event();
+[50]         }
+[51]         count = Events.plan.count;
+[52]       }
+[53]       plan.generate();
+[54]       synchronized (Events.exec) {
+[55]           Events.exec.signal_event();
+[56]       }
+[57]     }
+
+OriginalCode@65-74:
+[65]     count = Events.exec.count;
+[66]     while(true){
+[67]       Events.plan.signal_event();
+[68]       if (count == Events.exec.count)
+[69]         Events.exec.wait_for_event();
+[70]       count = Events.exec.count;
+[71]       while (!plan.done()) {
+[72]         plan.executeToken();
+[73]       }
+[74]     }
+FixedCode@65-74:
+[65]     synchronized (Events.exec) {
+[66]         count = Events.exec.count;
+[67]     }
+[68]     while(true){
+[69]       synchronized (Events.plan) {
+[70]           Events.plan.signal_event();
+[71]       }
+[72]       synchronized (Events.exec) {
+[73]           if (count == Events.exec.count) {
+[74]               Events.exec.wait_for_event();
+[75]           }
+[76]           count = Events.exec.count;
+[77]       }
+[78]       while (!plan.done()) {
+[79]           plan.executeToken();
+[80]       }
+[81]     }
+
+ChangeLog:2@RAXextended.java
+FixDescription: Add missing getCurrentToken method in Plan class to allow Observer thread to function correctly.
+OriginalCode@34-34:
+[34] }
+FixedCode@34-36:
+[34]   public synchronized int getCurrentToken() {
+[35]       return currentToken;
+[36]   }

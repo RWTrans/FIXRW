@@ -1,0 +1,46 @@
+ChangeLog:1@ProducerConsumer.java
+FixDescription: Ensure that all producer threads are stored and started correctly, and that all consumer threads are joined properly to allow for correct termination and result validation.
+OriginalCode@15-21:
+[15]         Producer p;
+[16]         for (int i = 0; i < PRODS; i++)
+[17]           p = new Producer(b);
+[18]         for (int i = 0; i < CONS; i++)
+[19]           cons[i] = new Consumer(b);
+[20]         for (int i = 0; i < CONS; i++)
+[21]           cons[i].join();
+FixedCode@15-21:
+[15]         Producer[] prods = new Producer[PRODS];
+[16]         for (int i = 0; i < PRODS; i++) {
+[17]           prods[i] = new Producer(b);
+[18]         }
+[19]         for (int i = 0; i < CONS; i++) {
+[20]           cons[i] = new Consumer(b);
+[21]         }
+[22]         for (int i = 0; i < PRODS; i++) {
+[23]           prods[i].join();
+[24]         }
+[25]         for (int i = 0; i < CONS; i++) {
+[26]           cons[i].join();
+[27]         }
+
+ChangeLog:2@ProducerConsumer.java
+FixDescription: Modify the synchronization of the total increment operation to avoid race conditions.
+OriginalCode@129-131:
+[129]     public synchronized void inc(int x) {
+[130] 	ProducerConsumer.total = ProducerConsumer.total + x;
+[131]     }
+FixedCode@129-131:
+[129]     public void inc(int x) {
+[130]         synchronized (ProducerConsumer.class) {
+[131]             ProducerConsumer.total = ProducerConsumer.total + x;
+[132]         }
+[133]     }
+
+ChangeLog:3@ProducerConsumer.java
+FixDescription: Modify the halt condition in the buffer to ensure that all producers have finished before halting.
+OriginalCode@107-107:
+[107]         buffer.halt();
+FixedCode@107-107:
+[107]         if (Thread.currentThread().getId() == ProducerConsumer.PRODS) {
+[108]             buffer.halt();
+[109]         }

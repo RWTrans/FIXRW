@@ -1,0 +1,6 @@
+{
+  "case_id": "access_token_refresh_race_001",
+  "repository": "binarywang/WxJava",
+  "project_version": "3.5.10.B",
+  "test_entry": "weixin-java-mp/src/test/java/me/chanjar/weixin/mp/api/impl/BaseWxMpServiceImplTest.java#refreshAccessTokenDuplicatelyTest"
+}

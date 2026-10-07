@@ -1,0 +1,6 @@
+{
+  "case_id": "merge_ringbuffer_race_merge_001",
+  "repository": "ReactiveX/RxJava",
+  "project_version": "0.20.0-RC1-SNAPSHOT",
+  "test_entry": "rxjava-core/src/test/java/rx/internal/operators/OperatorMergeTest.java#mergeManyAsyncSingle"
+}

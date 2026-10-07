@@ -1,0 +1,198 @@
+[
+  {
+    "case_id": "account",
+    "generator": "ConGuard",
+    "correctness": "correct",
+    "before": "before",
+    "after": "after"
+  },
+  {
+    "case_id": "accountsubtype",
+    "generator": "ConGuard",
+    "correctness": "correct",
+    "before": "before",
+    "after": "after"
+  },
+  {
+    "case_id": "airline",
+    "generator": "ConGuard",
+    "correctness": "correct",
+    "before": "before",
+    "after": "after"
+  },
+  {
+    "case_id": "alarmclock",
+    "generator": "ConGuard",
+    "correctness": "correct",
+    "before": "before",
+    "after": "after"
+  },
+  {
+    "case_id": "atmoerror",
+    "generator": "ConGuard",
+    "correctness": "correct",
+    "before": "before",
+    "after": "after"
+  },
+  {
+    "case_id": "buggyprogram",
+    "generator": "ConGuard",
+    "correctness": "correct",
+    "before": "before",
+    "after": "after"
+  },
+  {
+    "case_id": "checkfield",
+    "generator": "ConGuard",
+    "correctness": "correct",
+    "before": "before",
+    "after": "after"
+  },
+  {
+    "case_id": "consistency",
+    "generator": "ConGuard",
+    "correctness": "correct",
+    "before": "before",
+    "after": "after"
+  },
+  {
+    "case_id": "critical",
+    "generator": "ConGuard",
+    "correctness": "correct",
+    "before": "before",
+    "after": "after"
+  },
+  {
+    "case_id": "datarace",
+    "generator": "ConGuard",
+    "correctness": "correct",
+    "before": "before",
+    "after": "after"
+  },
+  {
+    "case_id": "even",
+    "generator": "ConGuard",
+    "correctness": "correct",
+    "before": "before",
+    "after": "after"
+  },
+  {
+    "case_id": "hashcodetest",
+    "generator": "ConGuard",
+    "correctness": "correct",
+    "before": "before",
+    "after": "after"
+  },
+  {
+    "case_id": "log4j",
+    "generator": "ConGuard",
+    "correctness": "correct",
+    "before": "before",
+    "after": "after"
+  },
+  {
+    "case_id": "linkedlist",
+    "generator": "ConGuard",
+    "correctness": "correct",
+    "before": "before",
+    "after": "after"
+  },
+  {
+    "case_id": "mergesort",
+    "generator": "ConGuard",
+    "correctness": "correct",
+    "before": "before",
+    "after": "after"
+  },
+  {
+    "case_id": "pingpong",
+    "generator": "ConGuard",
+    "correctness": "correct",
+    "before": "before",
+    "after": "after"
+  },
+  {
+    "case_id": "raxextended",
+    "generator": "ConGuard",
+    "correctness": "correct",
+    "before": "before",
+    "after": "after"
+  },
+  {
+    "case_id": "reorder2",
+    "generator": "ConGuard",
+    "correctness": "correct",
+    "before": "before",
+    "after": "after"
+  },
+  {
+    "case_id": "store",
+    "generator": "ConGuard",
+    "correctness": "correct",
+    "before": "before",
+    "after": "after"
+  },
+  {
+    "case_id": "wrongLock",
+    "generator": "ConGuard",
+    "correctness": "correct",
+    "before": "before",
+    "after": "after"
+  },
+  {
+    "case_id": "wrongLock2",
+    "generator": "ConGuard",
+    "correctness": "correct",
+    "before": "before",
+    "after": "after"
+  },
+  {
+    "case_id": "pool",
+    "generator": "ConGuard",
+    "correctness": "incorrect",
+    "before": "before",
+    "after": "after"
+  },
+  {
+    "case_id": "producerConsumer",
+    "generator": "ConGuard",
+    "correctness": "incorrect",
+    "before": "before",
+    "after": "after"
+  },
+  {
+    "case_id": "raxextended2",
+    "generator": "ConGuard",
+    "correctness": "incorrect",
+    "before": "before",
+    "after": "after"
+  },
+  {
+    "case_id": "stringbuffer",
+    "generator": "ConGuard",
+    "correctness": "incorrect",
+    "before": "before",
+    "after": "after"
+  },
+  {
+    "case_id": "account",
+    "generator": "Prometheus",
+    "correctness": "incorrect",
+    "before": "before",
+    "after": "after"
+  },
+  {
+    "case_id": "atmoerror",
+    "generator": "Prometheus",
+    "correctness": "incorrect",
+    "before": "before",
+    "after": "after"
+  },
+  {
+    "case_id": "store",
+    "generator": "Prometheus",
+    "correctness": "incorrect",
+    "before": "before",
+    "after": "after"
+  }
+]

@@ -1,0 +1,168 @@
+##### You were given a code snippet that may contain concurrency bugs. Some methods unrelated to the concurrency bugs have already been filtered out.
+### source code
+#### ProducerConsumer.java
+```java
+1. package producerConsumer;
+2. public class ProducerConsumer {
+3.     public static int PRODS = 3;
+4.     public static int CONS = 4;
+5.     public static int COUNT = 8;
+6.     public static int total = 0;
+7.     public static void main(String[] args) throws Exception {
+8.         if (args != null && args.length == 3) {
+9. 	  PRODS = Integer.parseInt(args[0]);
+10. 	  CONS = Integer.parseInt(args[1]);
+11. 	  COUNT = Integer.parseInt(args[2]);
+12. 	}
+13.         Consumer[] cons = new Consumer[CONS];
+14.         Buffer b = new Buffer(5);
+15.         Producer p;
+16.         for (int i = 0; i < PRODS; i++)
+17.           p = new Producer(b);
+18.         for (int i = 0; i < CONS; i++)
+19.           cons[i] = new Consumer(b);
+20.         for (int i = 0; i < CONS; i++)
+21.           cons[i].join();
+22.         if (total != COUNT*PRODS)
+23.           throw new RuntimeException("bug found - total is "+total+" and should be "+COUNT*PRODS);
+24.     }
+25. }
+26. class HaltException extends Exception {
+27. }
+28. interface BufferInterface {
+29.     public void put(Object x);
+30.     public Object get();
+31.     public void halt();
+32. }
+33. class Buffer implements BufferInterface {
+34.     protected int SIZE;
+35.     protected Object[] array;
+36.     protected int putPtr = 0;
+37.     protected int getPtr = 0;
+38.     protected int usedSlots = 0;
+39.     protected boolean halted = false;
+40.     public Buffer(int b) {
+41.         SIZE = b;
+42.         array = new Object[b];
+43.     }
+44.     public synchronized void put(Object x) {
+45.         while (usedSlots == SIZE) {
+46.             try {
+47.                 wait();
+48.             } catch (InterruptedException ex) {
+49.             }
+50.         }
+51.         array[putPtr] = x;
+52.         putPtr = (putPtr + 1) % SIZE;
+53.         if (usedSlots == 0) {
+54.             notifyAll();
+55.         }
+56.         usedSlots++;
+57.     }
+58.     public synchronized Object get() {
+59.         while ((usedSlots == 0) & !halted) {
+60.             try {
+61.                 wait();
+62.             } catch (InterruptedException ex) {
+63.             }
+64.         }
+65.         if (usedSlots == 0) {
+66.             return null;
+67.         }
+68.         Object x = array[getPtr];
+69.         array[getPtr] = null;
+70.         getPtr = (getPtr + 1) % SIZE;
+71.         if (usedSlots == SIZE) {
+72.             notifyAll();
+73.         }
+74.         usedSlots--;
+75.         return x;
+76.     }
+77.     public synchronized void halt() {
+78.         halted = true;
+79.         notifyAll();
+80.     }
+81. }
+82. class Attribute {
+83.     public int attr;
+84.     public Attribute() {
+85.         attr = 0;
+86.     }
+87. //...
+88. }
+89. class AttrData extends Attribute {
+90.     public int data;
+91.     public AttrData(int attr, int data) {
+92.         this.attr = attr;
+93.         this.data = data;
+94.     }
+95. }
+96. class Producer extends Thread {
+97.     private Buffer buffer;
+98.     public Producer(Buffer b) {
+99.         buffer = b;
+100.         this.start();
+101.     }
+102.     public void run() {
+103.         for (int i = 0; i < ProducerConsumer.COUNT; i++) {
+104.             AttrData ad = new AttrData(i, 1);
+105.             buffer.put(ad);
+106.         }
+107.         buffer.halt();
+108.     }
+109. }
+110. class Consumer extends Thread {
+111.     private Buffer buffer;
+112.     public Consumer(Buffer b) {
+113.         buffer = b;
+114.         this.start();
+115.     }
+116.     public void run() {
+117.         int count = 0;
+118.         AttrData[] received = new AttrData[10];
+119.         while (count < received.length) {
+120.             received[count] = (AttrData) buffer.get();
+121.             if(received[count] == null) {
+122.                 break;    
+123.             } else {
+124. 		inc(received[count].data);
+125. 	    }
+126.             count++;
+127.         }
+128.     }
+129.     public synchronized void inc(int x) {
+130. 	ProducerConsumer.total = ProducerConsumer.total + x;
+131.     }
+132. }
+```
+### instruction
+Fix the concurrency bugs in this program. Please note that some methods have been omitted.These methods are unrelated to concurrency bugs, perform any modifications to them would be considered violations. Please ensure that fixing doesn't introduce new bugs, such as deadlocks.Try to minimize the impact on concurrency due to the fixes. Do not attempt to change the functionality of any function, and do not modify any code that is unrelated to concurrency bugs.Note that you don't need to reply with the entire source code after it's been fixed. Just provide the parts that were modified.For your answer, return one or more ChangeLog groups, each containing one or more fixes to the above code snippets. Each group must be formatted with the below instructions.Format instructions: Each ChangeLog group must start with a description of its included fixes. The group must then list one or more pairs of (OriginalCode, FixedCode) code snippets. Each OriginalCode snippet must list all consecutive original lines of code that must be replaced (including a few lines before and after the fixes), followed by the FixedCode snippet with all consecutive fixed lines of code that must replace the original lines of code (including the same few lines before and after the changes). In each pair, the OriginalCode and FixedCode snippets must start at the same source code line number N. Each listed code line, in both the OriginalCode and FixedCode snippets must be prefixed with [N] that matches the line index N in the above snippets , and then be prefixed with exactly the same whitespace indentation as the original snippets above.For example:
+ChangeLog:1@<file>
+FixDescription: <summary>.
+OriginalCode@4-6:
+[4] <white space> <original code line>
+[5] <white space> <original code line>
+[6] <white space> <original code line>
+FixedCode@4-6:
+[4] <white space> <fixed code line>
+[5] <white space> <fixed code line>
+[6] <white space> <fixed code line>
+OriginalCode@9-10:
+[9] <white space> <original code line>
+[10] <white space> <original code line>
+FixedCode@9-9: 
+[9] <white space> <fixed code line>
+ChangeLog:2@<file>
+FixDescription: <summary>.
+OriginalCode@15-16:
+[15] <white space> <original code line>
+[16]<white space> <original code line>
+FixedCode@15-17:
+[15] <white space> <fixed code line>
+[16] <white space> <fixed code line>
+[17] <white space> <fixed code line>
+OriginalCode@23-23:
+[23] <white space> <original code line>
+FixedCode@23-23:
+[23] <white space> <fixed code line>
+    

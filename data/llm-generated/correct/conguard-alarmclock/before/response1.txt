@@ -1,0 +1,92 @@
+### ChangeLog:1@Monitor.java
+FixDescription: Addressing potential deadlocks and data races. Original code lacks synchronization on the `waitList` when accessed by multiple threads for operations like `createLock` and `getLock`. Ensuring all operations on `waitList` and its internal list array are synchronized to avoid potential race conditions and deadlocks due to inconsistent synchronization.
+
+OriginalCode@156-176:
+```java
+[156]     MyObject createLock(int n) {
+[157]         MyObject temp;
+[158]         int key;
+[159]         for (int i = 0; i < size; i++) {
+[160]             key = ((MyObject) list[i]).time;
+[161]             if (n == key) {
+[162]                 temp = (MyObject) list[i];
+[163]                 return temp;
+[164]             }
+[165]         }
+[166]         MyObject lock = new MyObject(n);
+[167]         for (int i = 0; i < size; i++) {
+[168]             key = ((MyObject) list[i]).time;
+[169]             if (n < key) {
+[170]                 this.insertElementAt((Object) lock, i);
+[171]                 return lock;
+[172]             }
+[173]         }
+[174]         this.addElement((Object) lock);
+[175]         return lock;
+[176]     }
+```
+FixedCode@156-176:
+```java
+[156]     synchronized MyObject createLock(int n) {
+[157]         MyObject temp;
+[158]         int key;
+[159]         synchronized (this) {
+[160]             for (int i = 0; i < size; i++) {
+[161]                 key = ((MyObject) list[i]).time;
+[162]                 if (n == key) {
+[163]                     temp = (MyObject) list[i];
+[164]                     return temp;
+[165]                 }
+[166]             }
+[167]             MyObject lock = new MyObject(n);
+[168]             for (int i = 0; i < size; i++) {
+[169]                 key = ((MyObject) list[i]).time;
+[170]                 if (n < key) {
+[171]                     this.insertElementAt((Object) lock, i);
+[172]                     return lock;
+[173]                 }
+[174]             }
+[175]             this.addElement((Object) lock);
+[176]             return lock;
+[177]         }
+[178]     }
+```
+
+### ChangeLog:2@Monitor.java
+FixDescription: Enhanced synchronization of `getLock` to prevent data races and potential deadlocks. Original code accesses shared list elements without proper synchronization, risking inconsistent states between threads.
+
+OriginalCode@178-189:
+```java
+[178]     MyObject getLock(int n) {
+[179]         MyObject temp;
+[180]         int m;
+[181]         for (int i = 0; i < size; i++) {
+[182]             m = ((MyObject) list[i]).time;
+[183]             if (n == m) {
+[184]                 temp = (MyObject) list[i];
+[185]                 return temp;
+[186]             }
+[187]         }
+[188]         throw new IndexOutOfBoundsException();
+[189]     }
+```
+FixedCode@178-189:
+```java
+[178]     synchronized MyObject getLock(int n) {
+[179]         MyObject temp;
+[180]         int m;
+[181]         synchronized (this) {
+[182]             for (int i = 0; i < size; i++) {
+[183]                 m = ((MyObject) list[i]). time;
+[184]                 if (n == m) {
+[185]                     temp = (MyObject) list[i];
+[186]                     return temp;
+[187]                 }
+[188]             }
+[189]             throw new IndexOutOfBoundsException();
+[190]         }
+[191]     }
+```
+
+Explanation:
+These changes ensure that both the `createLock` and `getLock` functions are fully synchronized, preventing any thread from modifying the list while another thread is reading or writing to it. This prevents both data races and potential deadlocks that could arise from concurrent modifications to the shared list structure, thus maintaining program stability and consistency.

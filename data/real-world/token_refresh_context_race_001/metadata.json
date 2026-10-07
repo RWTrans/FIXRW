@@ -1,0 +1,6 @@
+{
+  "case_id": "token_refresh_context_race_001",
+  "repository": "keycloak/keycloak",
+  "project_version": "9.0.4-SNAPSHOT",
+  "test_entry": "testsuite/integration-arquillian/tests/base/src/test/java/org/keycloak/testsuite/adapter/servlet/DemoServletsAdapterTest.java#testTokenConcurrentRefresh"
+}

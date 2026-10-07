@@ -1,0 +1,7 @@
+{
+  "case_id": "pool",
+  "generator": "ConGuard",
+  "correctness": "incorrect",
+  "before": "before",
+  "after": "after"
+}

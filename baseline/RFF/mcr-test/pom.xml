@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>mcr-checker</artifactId>
+        <groupId>aser</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>mcr-test</artifactId>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+
+            <!--<plugin>-->
+                <!--<groupId>org.apache.maven.plugins</groupId>-->
+                <!--<artifactId>maven-jar-plugin</artifactId>-->
+                <!--<version>2.3.1</version>-->
+                <!--<configuration>-->
+                    <!--<outputDirectory>${pom.basedir}/../build</outputDirectory>-->
+                <!--</configuration>-->
+            <!--</plugin>-->
+        </plugins>
+    </build>
+
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+        </dependency>
+        <dependency>
+            <groupId>aser</groupId>
+            <artifactId>mcr-scheduler</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>aser</groupId>
+            <artifactId>mcr-instrumentor</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.12</version>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.12</version>
+        </dependency>
+
+        <dependency>
+            <groupId>weblech</groupId>
+            <artifactId>weblech</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/weblech.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>derby</groupId>
+            <artifactId>derby</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/derby2861.jar</systemPath>
+        </dependency>
+<!--        added by toby-->
+        <dependency>
+            <groupId>poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/poi-3.17.jar</systemPath>
+        </dependency>
+
+
+        <dependency>
+            <groupId>jms</groupId>
+            <artifactId>jms</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/additionalJAR/javax.jms.jar</systemPath>
+        </dependency>
+
+
+        <dependency>
+            <groupId>jdmkrt</groupId>
+            <artifactId>jdmkrt</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/additionalJAR/jdmkrt.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>mail</groupId>
+            <artifactId>mail</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/additionalJAR/mail.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>collection</groupId>
+            <artifactId>collection</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/additionalJAR/lib/realLib/commons-collections-2.1.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>dbcp</groupId>
+            <artifactId>dbcp</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/additionalJAR/lib/realLib/commons-dbcp-1.2.jar</systemPath>
+        </dependency>
+
+
+        <dependency>
+            <groupId>pool1.2</groupId>
+            <artifactId>pool1.2</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/additionalJAR/lib/realLib/commons-pool-1.2.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>pool1.4</groupId>
+            <artifactId>pool1.4</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/additionalJAR/lib/realLib/commons-pool-1.4-SNAPSHOT.jar</systemPath>
+        </dependency>
+
+
+        <dependency>
+            <groupId>pool1.5</groupId>
+            <artifactId>pool1.5</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/additionalJAR/lib/realLib/commons-pool-1.5.jar</systemPath>
+        </dependency>
+
+
+        <dependency>
+            <groupId>coring</groupId>
+            <artifactId>coring</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/additionalJAR/lib/realLib/coring-1.4.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>pool1.5source</groupId>
+            <artifactId>pool1.5source</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/additionalJAR/lib/realLib/commons-pool-1.5-sources.jar</systemPath>
+        </dependency>
+
+
+        <dependency>
+            <groupId>jacontebe</groupId>
+            <artifactId>jacontebe</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/additionalJAR/lib/realLib/jacontebe-1.0.jar</systemPath>
+        </dependency>
+
+
+
+        <dependency>
+            <groupId>mockito</groupId>
+            <artifactId>mockito</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/additionalJAR/lib/realLib/mockito-all-1.9.5.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>mock</groupId>
+            <artifactId>mock</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/additionalJAR/lib/realLib/powermock-mockito-1.5.3-full.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>derby3</groupId>
+            <artifactId>derby3</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/additionalJAR/lib/realLib/derby.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>derbyclient</groupId>
+            <artifactId>derbyclient</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/additionalJAR/lib/realLib/derbyclient.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>groovy</groupId>
+            <artifactId>groovy</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/additionalJAR/lib/realLib/groovy-all-1.7.9.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>javaee</groupId>
+            <artifactId>javaee</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/additionalJAR/lib/realLib/javaee.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>ant</groupId>
+            <artifactId>ant</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/additionalJAR/lib/realLib/ant.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>ant-launch</groupId>
+            <artifactId>ant-launch</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/additionalJAR/lib/realLib/ant-launcher.jar</systemPath>
+        </dependency>
+
+
+<!--        <dependency>-->
+<!--            <groupId>org.apache.hadoop</groupId>-->
+<!--            <artifactId>hadoop-common</artifactId>-->
+<!--            <version>2.7.1</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.apache.hadoop</groupId>-->
+<!--            <artifactId>hadoop-hdfs</artifactId>-->
+<!--            <version>2.7.1</version>-->
+<!--        </dependency>-->
+
+
+    </dependencies>
+
+
+</project>
